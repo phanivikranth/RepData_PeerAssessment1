@@ -3,6 +3,10 @@ title: "PA1_template"
 output: html_document
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.path='Figures/')
+```
+
 Upzip of the file after the download of the file and Adding the file to the data.frame
 ```{r}
 unzip("activity.zip")
