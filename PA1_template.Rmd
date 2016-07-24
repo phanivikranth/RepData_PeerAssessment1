@@ -5,7 +5,7 @@ output: html_document
 
 Upzip of the file after the download of the file and Adding the file to the data.frame
 ```{r}
-unzip("repdata%2Fdata%2Factivity.zip")
+unzip("activity.zip")
 activity1 <- read.csv("activity.csv")
 ```
 
