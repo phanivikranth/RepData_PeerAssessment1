@@ -1,25 +1,86 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "PA1_template"
+output: html_document
 ---
 
+Upzip of the file after the download of the file and Adding the file to the data.frame
+```{r}
+unzip("repdata%2Fdata%2Factivity.zip")
+activity1 <- read.csv("activity.csv")
+```
 
-## Loading and preprocessing the data
+Create a histogram of the aggregation for the Histogram of the total number of steps taken each day
+
+```{r}
+hist((aggregate(steps ~ date,activity1,sum,na.action = NULL,na.rm = TRUE))$steps,main = "Histogram of total steps taken per day",xlab = "Total steps taken per day")
+```
+
+Calculating the total number of steps taken and then there mean and median
+
+```{r}
+mean((aggregate(steps ~ date,activity1,sum,na.action = NULL,na.rm = TRUE))$steps)
+median((aggregate(steps ~ date,activity1,sum,na.action = NULL,na.rm = TRUE))$steps)
+```
+
+Plots to create time series plot with the interval and average number of steps taken.
+
+```{r}
+plot.ts(aggregate(steps ~ interval,activity1,mean))
+plot(aggregate(steps ~ interval,activity1,mean),type = 'l')
+```
+
+Code for the maximum number of steps taken in a particular 5 sec interval. Interval given below
+
+```{r}
+aggregate(steps ~ interval,activity1,mean)[which.max(aggregate(steps ~ interval,activity1,mean)$steps),]$interval
+```
+Code for the Maximum number of steps taken in a particular 5 sec interval, steps and Interval given below.
+```{r}
+aggregate(steps ~ interval,activity1,mean)[which.max(aggregate(steps ~ interval,activity1,mean)$steps),]
+```
+
+Code for calculating the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r}
+sum(rowSums(is.na(activity1)))
+```
+
+Strategy to fill or impute the dataset on the missing values with the median.
+
+```{r}
+activitiy1AddMissingValue  <- transform(activity1, steps = ifelse(is.na(steps), round(median(steps, na.rm=TRUE)), steps))
+sum(rowSums(is.na(activitiy1AddMissingValue)))
+```
+
+Histogram after the missing values added with the median.
+
+```{r}
+hist((aggregate(steps ~ date,activitiy1AddMissingValue,sum,na.action = NULL,na.rm = TRUE))$steps,main = "Histogram of total steps taken per day with missing value filled in",xlab = "Total steps taken per day")
+```
+
+It looks there is no difference in the plot, let's look into the difference in the mean, median before adding the missing values and after filling the missing values.
+
+```{r}
+mean((aggregate(steps ~ date,activity1,sum,na.action = NULL,na.rm = TRUE))$steps) - mean((aggregate(steps ~ date,activitiy1AddMissingValue,sum,na.action = NULL,na.rm = TRUE))$steps)
+```
+
+```{r}
+median((aggregate(steps ~ date,activity1,sum,na.action = NULL,na.rm = TRUE))$steps) - median((aggregate(steps ~ date,activitiy1AddMissingValue,sum,na.action = NULL,na.rm = TRUE))$steps)
+```
 
 
+Adding the Weekdays factor and creating another dataset with the factor
+```{r}
+activityfactorweekday0rweekend <- factor(weekdays(as.Date(activitiy1AddMissingValue$date)) %in% c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),levels = c(FALSE,TRUE),labels = c('weekend','weekday'))
+summary(activityfactorweekday0rweekend)
+```
+Adding another dataset with the weekday and weekend column and Adding the necessary packages and also creating the plot for the Weekend and week day information.
 
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+activitymissingtest <- activitiy1AddMissingValue
+activitymissingtest$WeekdayorWeekend <- activityfactorweekday0rweekend
+library(dplyr)
+activityAggregate <- activitymissingtest  %>% group_by(WeekdayorWeekend, interval) %>% summarize(stepsdetails = mean(steps))
+library(ggplot2)
+ggplot(activityAggregate, aes(interval,stepsdetails))+geom_line(color="blue")+ facet_wrap(~WeekdayorWeekend, ncol=1)
+```
